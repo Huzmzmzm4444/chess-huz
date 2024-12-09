@@ -62,10 +62,7 @@ void BotPlayer::performBotMove() {
     chessGame->movePiece(bestMove.move.fromRow, bestMove.move.fromCol, bestMove.move.toRow, bestMove.move.toCol);
     std::cout << "Move executed on the game board." << std::endl;
 
-    // Добавляем ход в историю
-    chessGame->moveHistory.push_back({chessGame->board[bestMove.move.toRow][bestMove.move.toCol],
-                                      bestMove.move.fromRow, bestMove.move.fromCol,
-                                      bestMove.move.toRow, bestMove.move.toCol, 'B'});
+
     std::cout << "Move added to moveHistory." << std::endl;
 }
 
