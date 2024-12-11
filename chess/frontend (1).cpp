@@ -5,7 +5,7 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Widget.H>
-#include <FL/Fl_Button.H>     // Added this include for Fl_Button
+#include <FL/Fl_Button.H>     
 #include <FL/Fl_Box.H>
 #include <FL/Fl_PNG_Image.H>
 #include <FL/fl_draw.H>
@@ -357,7 +357,7 @@ void ChessBoard::loadPieceImages() {
     delete img;
 
     // Загружаем изображение шаха
-    checkImage = new Fl_PNG_Image((basePath + "cat.png").c_str()); // Замените "cat.png" на ваше изображение
+    checkImage = new Fl_PNG_Image((basePath + "cat.png").c_str()); 
 }
 
 bool ChessBoard::isPossibleMove(int row, int col) {
