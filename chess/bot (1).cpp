@@ -440,14 +440,13 @@ std::vector<Move> BotPlayer::getValidMovesForPiece(const GameState& state, int f
                 }
             }
         }
-        // Логика для рокировки можно добавить здесь
     }
-    // Добавьте дополнительные условия для других фигур, если необходимо
+    
 
     return validMoves;
 }
 
-// Функция проверки, является ли фигура противника
+// Функция проверки, является ли фигура захваченной противником
 bool BotPlayer::isOpponentPiece(char piece, char targetPiece) {
     if ((piece >= 'A' && piece <= 'Z') && (targetPiece >= 'a' && targetPiece <= 'z')) {
         return true;
@@ -513,6 +512,5 @@ void BotPlayer::copyGameState(const ChessGame& game, GameState& state) {
     // Копируем списки захваченных фигур
     state.whiteCapturedPieces = game.whiteCapturedPieces;
     state.blackCapturedPieces = game.blackCapturedPieces;
-    // Дополнительно можно скопировать другие необходимые данные
     std::cout << "copyGameState: State copied successfully." << std::endl;
 }
