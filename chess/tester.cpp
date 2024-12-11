@@ -15,9 +15,6 @@ struct BotTestCase {
 struct RuleTestCase {
     std::string description;
     char board[8][8];
-    // Для теста правил нам нужно знать, что мы проверяем.
-    // Например, можно проверить ход, ожидаемый результат (true/false для isValidMove),
-    // или состояние (isInCheck, isInCheckmate)
     enum TestType {CHECK_MOVE, CHECK_INCHECK, CHECK_INCHECKMATE} testType;
     // Параметры для CHECK_MOVE:
     int fromRow, fromCol, toRow, toCol;
@@ -286,7 +283,7 @@ std::vector<RuleTestCase> createRuleTestCases() {
         // row=7 - низ
         // a1 это (7,0), a4 это (4,0)
         // поставим пешку на row=5,col=0, чтобы она была между a1 и a4
-        pos[5][0]='P'; // пешка на a3 (с точки зрения реальной доски)
+        pos[5][0]='P'; // пешка на a3 
         tc.testType=RuleTestCase::CHECK_MOVE;
         tc.fromRow=7;tc.fromCol=0; // Ладья a1
         tc.toRow=4;tc.toCol=0;     // a4
@@ -369,7 +366,7 @@ std::vector<RuleTestCase> createRuleTestCases() {
 }
 
 int main() {
-    // Сначала тесты для бота
+    //тесты для бота
     auto botTests = createBotTestCases();
     int testNumber = 1;
     int successCount = 0;
@@ -415,7 +412,7 @@ int main() {
     std::cout << "Всего тестов для бота: " << botTests.size() << "\n";
     std::cout << "Успешных тестов (бот сделал ход): " << successCount << "\n\n";
 
-    // Теперь тесты для правил игры
+    // Тесты для правил игры
     auto ruleTests = createRuleTestCases();
     int ruleTestNumber=1;
     int ruleSuccessCount=0;
