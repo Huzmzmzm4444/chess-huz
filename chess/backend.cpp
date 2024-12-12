@@ -366,9 +366,8 @@ bool ChessGame::movePiece(int fromRow, int fromCol, int toRow, int toCol) {
 
     return true;
 }
-static char promotionChoice = 'Q'; // По умолчанию Ферзь
+static char promotionChoice = 'Q'; 
 
-// Колбэк для кнопок
 static void promotion_cb(Fl_Widget* w, void* data) {
     char choice = *(char*)data;
     promotionChoice = choice;
@@ -376,30 +375,25 @@ static void promotion_cb(Fl_Widget* w, void* data) {
 }
 char ChessGame::showPromotionWindow(char piece) {
     Fl_Window win(300, 200, "Выбор фигуры");
-    win.set_modal(); // Модальное окно
+    win.set_modal();
 
-    // Надпись
+    
     Fl_Box* label = new Fl_Box(10, 10, 280, 30, "Выберите фигуру для превращения:");
     label->labelfont(FL_HELVETICA_BOLD);
     label->labelsize(14);
 
-    // Создаём кнопки для выбора
-    // Ферзь
     static char q = 'Q';
     Fl_Button* queenBtn = new Fl_Button(20, 50, 260, 30, "Ферзь");
     queenBtn->callback(promotion_cb, &q);
 
-    // Ладья
     static char r = 'R';
     Fl_Button* rookBtn = new Fl_Button(20, 90, 260, 30, "Ладья");
     rookBtn->callback(promotion_cb, &r);
 
-    // Слон
     static char b = 'B';
     Fl_Button* bishopBtn = new Fl_Button(20, 130, 260, 30, "Слон");
     bishopBtn->callback(promotion_cb, &b);
 
-    // Конь
     static char n = 'N';
     Fl_Button* knightBtn = new Fl_Button(20, 170, 260, 30, "Конь");
     knightBtn->callback(promotion_cb, &n);
@@ -407,7 +401,6 @@ char ChessGame::showPromotionWindow(char piece) {
     win.end();
     win.show();
 
-    // Запускаем локальный цикл обработки событий, пока окно открыто
     while (win.shown()) {
         Fl::wait();
     }
