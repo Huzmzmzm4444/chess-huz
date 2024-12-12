@@ -8,8 +8,6 @@
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Button.H>
 
-// Помощная функция для проверки, атаковано ли поле фигурами противника.
-// Можно использовать логику из isInCheck, но подставить нашу цель.
 bool ChessGame::isSquareAttacked(int row, int col, char opponentColor, const char boardState[SIZE][SIZE]) {
     // Проходим по всем фигурам противника и проверяем, могут ли они пойти на (row, col)
     for (int r = 0; r < SIZE; r++) {
@@ -127,8 +125,7 @@ bool ChessGame::isInCheckmate(char kingChar) {
 }
 
 bool ChessGame::isStalemate(char kingChar) {
-    // Можно реализовать аналогично isInCheckmate, но проверяя отсутствие шаха
-    // Опустим детально, сейчас оставим false
+   
     return false;
 }
 
@@ -188,7 +185,6 @@ bool ChessGame::isValidMove(int fromRow, int fromCol, int toRow, int toCol, char
         }
         // Если дошли сюда, рокировка допустима
         if (!ignoreCheck) {
-            // Проверим, что после хода не остается шаха (уже проверили выше)
         }
         return true;
     }
@@ -261,7 +257,6 @@ bool ChessGame::movePiece(int fromRow, int fromCol, int toRow, int toCol) {
     if (piece == '.') return false;
     char playerColor = (piece >= 'A' && piece <= 'Z') ? 'W' : 'B';
 
-    // Если это рокировка, после isValidMove уже всё проверено.
     if (piece == 'K' && playerColor=='W' && fromRow==7 && fromCol==4 && toRow==7 && (toCol==6||toCol==2)) {
         bool shortCastling = (toCol==6);
         board[7][4]='.';
@@ -344,11 +339,20 @@ bool ChessGame::movePiece(int fromRow, int fromCol, int toRow, int toCol) {
     if (piece=='r' && fromRow==0 && fromCol==0) blackRookMoved[0]=true;
     if (piece=='r' && fromRow==0 && fromCol==7) blackRookMoved[1]=true;
 
+    // Обновляем enPassant
+    if (piece=='P' && fromRow==6 && toRow==4 && fromCol==toCol && captured=='.') {
+        enPassantTargetRow=5;enPassantTargetCol=toCol;
+    } else if (piece=='p' && fromRow==1 && toRow==3 && fromCol==toCol && captured=='.') {
+        enPassantTargetRow=2;enPassantTargetCol=toCol;
+    } else {
+        enPassantTargetRow=-1;enPassantTargetCol=-1;
+    }
+
     if ((piece == 'P' && toRow == 0) || (piece == 'p' && toRow == 7)) {
-        // Здесь мы вызываем окно выбора фигуры
+        //окно выбора фигуры
         char newPiece = showPromotionWindow(piece);
         if (playerColor == 'W') {
-            // Пользователь выбрал заглавную букву
+           
             board[toRow][toCol] = newPiece;
         } else {
             // Для чёрных — строчная версия
@@ -366,7 +370,8 @@ bool ChessGame::movePiece(int fromRow, int fromCol, int toRow, int toCol) {
 
     return true;
 }
-static char promotionChoice = 'Q'; 
+
+static char promotionChoice = 'Q';
 
 static void promotion_cb(Fl_Widget* w, void* data) {
     char choice = *(char*)data;
@@ -375,7 +380,7 @@ static void promotion_cb(Fl_Widget* w, void* data) {
 }
 char ChessGame::showPromotionWindow(char piece) {
     Fl_Window win(300, 200, "Выбор фигуры");
-    win.set_modal();
+    win.set_modal(); 
 
     
     Fl_Box* label = new Fl_Box(10, 10, 280, 30, "Выберите фигуру для превращения:");
@@ -390,6 +395,7 @@ char ChessGame::showPromotionWindow(char piece) {
     Fl_Button* rookBtn = new Fl_Button(20, 90, 260, 30, "Ладья");
     rookBtn->callback(promotion_cb, &r);
 
+    
     static char b = 'B';
     Fl_Button* bishopBtn = new Fl_Button(20, 130, 260, 30, "Слон");
     bishopBtn->callback(promotion_cb, &b);
@@ -401,6 +407,7 @@ char ChessGame::showPromotionWindow(char piece) {
     win.end();
     win.show();
 
+    // Запускаем локальный цикл обработки событий, пока окно открыто
     while (win.shown()) {
         Fl::wait();
     }
