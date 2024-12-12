@@ -2,6 +2,11 @@
 #include <cmath>
 #include <algorithm>
 #include <vector>
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Box.H>
+#include <FL/Fl_Group.H>
+#include <FL/Fl_Button.H>
 
 // Помощная функция для проверки, атаковано ли поле фигурами противника.
 // Можно использовать логику из isInCheck, но подставить нашу цель.
@@ -339,29 +344,76 @@ bool ChessGame::movePiece(int fromRow, int fromCol, int toRow, int toCol) {
     if (piece=='r' && fromRow==0 && fromCol==0) blackRookMoved[0]=true;
     if (piece=='r' && fromRow==0 && fromCol==7) blackRookMoved[1]=true;
 
-    // Обновляем enPassant
-    if (piece=='P' && fromRow==6 && toRow==4 && fromCol==toCol && captured=='.') {
-        enPassantTargetRow=5;enPassantTargetCol=toCol;
-    } else if (piece=='p' && fromRow==1 && toRow==3 && fromCol==toCol && captured=='.') {
-        enPassantTargetRow=2;enPassantTargetCol=toCol;
+    if ((piece == 'P' && toRow == 0) || (piece == 'p' && toRow == 7)) {
+        // Здесь мы вызываем окно выбора фигуры
+        char newPiece = showPromotionWindow(piece);
+        if (playerColor == 'W') {
+            // Пользователь выбрал заглавную букву
+            board[toRow][toCol] = newPiece;
+        } else {
+            // Для чёрных — строчная версия
+            board[toRow][toCol] = tolower(newPiece);
+        }
     } else {
-        enPassantTargetRow=-1;enPassantTargetCol=-1;
+        // Обычное перемещение
+        board[toRow][toCol] = piece;
     }
 
-    // Превращение пешки
-    if (piece=='P' && toRow==0) {
-        board[toRow][toCol]='Q';
-    }
-    if (piece=='p' && toRow==7) {
-        board[toRow][toCol]='q';
-    }
+    board[fromRow][fromCol] = '.';
 
     moveHistory.push_back({piece,fromRow,fromCol,toRow,toCol,playerColor});
     currentPlayer=(currentPlayer=='W')?'B':'W';
 
     return true;
 }
+static char promotionChoice = 'Q'; // По умолчанию Ферзь
 
+// Колбэк для кнопок
+static void promotion_cb(Fl_Widget* w, void* data) {
+    char choice = *(char*)data;
+    promotionChoice = choice;
+    w->window()->hide();
+}
+char ChessGame::showPromotionWindow(char piece) {
+    Fl_Window win(300, 200, "Выбор фигуры");
+    win.set_modal(); // Модальное окно
+
+    // Надпись
+    Fl_Box* label = new Fl_Box(10, 10, 280, 30, "Выберите фигуру для превращения:");
+    label->labelfont(FL_HELVETICA_BOLD);
+    label->labelsize(14);
+
+    // Создаём кнопки для выбора
+    // Ферзь
+    static char q = 'Q';
+    Fl_Button* queenBtn = new Fl_Button(20, 50, 260, 30, "Ферзь");
+    queenBtn->callback(promotion_cb, &q);
+
+    // Ладья
+    static char r = 'R';
+    Fl_Button* rookBtn = new Fl_Button(20, 90, 260, 30, "Ладья");
+    rookBtn->callback(promotion_cb, &r);
+
+    // Слон
+    static char b = 'B';
+    Fl_Button* bishopBtn = new Fl_Button(20, 130, 260, 30, "Слон");
+    bishopBtn->callback(promotion_cb, &b);
+
+    // Конь
+    static char n = 'N';
+    Fl_Button* knightBtn = new Fl_Button(20, 170, 260, 30, "Конь");
+    knightBtn->callback(promotion_cb, &n);
+
+    win.end();
+    win.show();
+
+    // Запускаем локальный цикл обработки событий, пока окно открыто
+    while (win.shown()) {
+        Fl::wait();
+    }
+
+    return promotionChoice;
+}
 bool ChessGame::isValidPawnMove(int fromRow,int fromCol,int toRow,int toCol,char playerColor,const char currentBoard[SIZE][SIZE]) {
     int direction = (playerColor=='W')?-1:1;
     char oppStart=(playerColor=='W')?'a':'A';

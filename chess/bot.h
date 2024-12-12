@@ -33,9 +33,13 @@ private:
 
     static void botMoveCallback(void* data);
 
+
     BotMove minimax(const GameState& state, int depth, int alpha, int beta, bool isMaximizingPlayer);
 
     int evaluateBoard(const GameState& state);
+
+    void addMovesInDirections(const GameState& state, char piece, int fromRow, int fromCol, char playerColor,
+                         const int directions[][2], int directionCount, std::vector<Move>& validMoves);
 
     std::vector<Move> generateAllPossibleMoves(const GameState& state, char playerColor);
 

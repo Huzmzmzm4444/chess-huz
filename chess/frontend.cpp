@@ -5,7 +5,7 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Widget.H>
-#include <FL/Fl_Button.H>     
+#include <FL/Fl_Button.H>     // Added this include for Fl_Button
 #include <FL/Fl_Box.H>
 #include <FL/Fl_PNG_Image.H>
 #include <FL/fl_draw.H>
@@ -67,6 +67,8 @@ void ChessBoard::draw() {
             fl_rectf(x() + x_offset + j * cell_size, y() + 50 + i * cell_size, cell_size, cell_size);
 
             // Выделение возможных ходов
+            fl_line_style(FL_SOLID, 3);
+
             if (isPossibleMove(i, j)) {
                 fl_color(FL_GREEN);
                 fl_rect(x() + x_offset + j * cell_size, y() + 50 + i * cell_size, cell_size, cell_size);
@@ -357,7 +359,7 @@ void ChessBoard::loadPieceImages() {
     delete img;
 
     // Загружаем изображение шаха
-    checkImage = new Fl_PNG_Image((basePath + "cat.png").c_str()); 
+    checkImage = new Fl_PNG_Image((basePath + "cat.png").c_str()); // Замените "cat.png" на ваше изображение
 }
 
 bool ChessBoard::isPossibleMove(int row, int col) {

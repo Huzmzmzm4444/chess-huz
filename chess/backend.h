@@ -44,6 +44,8 @@ public:
 
     bool isKingPresent(char kingChar);
 
+    char showPromotionWindow(char piece);
+
     // Поиск позиции короля
     void findKingPosition(char kingChar, int& kingRow, int& kingCol);
 
