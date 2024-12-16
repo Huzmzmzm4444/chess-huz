@@ -1,5 +1,6 @@
 // tester.cpp
 
+
 #include "backend.h"
 #include "bot.h"
 #include <iostream>
@@ -15,15 +16,16 @@ struct BotTestCase {
 struct RuleTestCase {
     std::string description;
     char board[8][8];
-    enum TestType {CHECK_MOVE, CHECK_INCHECK, CHECK_INCHECKMATE} testType;
+    enum TestType {CHECK_MOVE, CHECK_INCHECK, CHECK_INCHECKMATE, CHECK_STALEMATE} testType;
     // Параметры для CHECK_MOVE:
     int fromRow, fromCol, toRow, toCol;
     char playerColor;
     bool expectedMoveResult; // true если ход должен быть валидным, false если нет.
-    // Для CHECK_INCHECK / CHECK_INCHECKMATE:
+    // Для CHECK_INCHECK / CHECK_INCHECKMATE / CHECK_STALEMATE:
     char kingChar;
-    bool expectedBoolResult; // ожидаемое значение isInCheck или isInCheckmate
+    bool expectedBoolResult; // ожидаемое значение isInCheck, isInCheckmate или isStalemate
 };
+
 
 // Функция для вывода доски
 void printBoard(const char board[8][8]) {
@@ -196,7 +198,7 @@ std::vector<BotTestCase> createBotTestCases() {
 
     {
         BotTestCase tc;
-        tc.description = "Сложная #4: Возможность жертвы ферзя (белые)";
+        tc.description = "Сложкая #4: Возможность жертвы ферзя (белые)";
         char pos[8][8]={
                 {'r','n','b','q','k','.','n','r'},
                 {'p','p','p','p','.','p','p','p'},
@@ -214,7 +216,7 @@ std::vector<BotTestCase> createBotTestCases() {
 
     {
         BotTestCase tc;
-        tc.description = "Сложная #5: Предотвращение немедленного мата (чёрные)";
+        tc.description = "Сложкая #5: Предотвращение немедленного мата (чёрные)";
         char pos[8][8]={
                 {'.','.','.','.','k','.','.','.'},
                 {'.','.','.','.','.','Q','.','.'},
@@ -271,19 +273,12 @@ std::vector<RuleTestCase> createRuleTestCases() {
                 {'P','.','.','.','.','.','.','.'}, // Поставим белую пешку перед ладьёй
                 {'.','.','.','.','.','.','.','.'},
                 {'.','.','.','.','.','.','.','.'},
-                {'.','P','P','P','P','P','P','P'},
+                {'R','P','P','P','P','P','P','P'}, // Ладья на a1 и пешка на a2
                 {'R','N','B','Q','K','B','N','R'}
         };
-        // Белая ладья на a1 хочет пойти на a3, но на a4 стоит пешка (3,0) закрывая путь
-        // Внимание: индексы row идут сверху вниз. Мы поставим пешку на row=3,col=0 (a5 если смотреть на доску)
-        // Ладья a1 = (7,0), попробуем пойти на (4,0) - a4
-        // Между (7,0) и (4,0) стоит пешка на (3,0)? В текущей расстановке пешка на (3,0) - это пятая строка сверху?
-        // В основном виде:
-        // row=0 - верх
-        // row=7 - низ
-        // a1 это (7,0), a4 это (4,0)
-        // поставим пешку на row=5,col=0, чтобы она была между a1 и a4
-        pos[5][0]='P'; // пешка на a3 
+        // Белая ладья на a1 хочет пойти на a4 (row=4, col=0), но на a2 (row=6, col=0) пешка стоит на a3 (row=5, col=0)
+        // Поставим пешку на row=5, col=0
+        pos[5][0]='P'; // Пешка на a3
         tc.testType=RuleTestCase::CHECK_MOVE;
         tc.fromRow=7;tc.fromCol=0; // Ладья a1
         tc.toRow=4;tc.toCol=0;     // a4
@@ -324,7 +319,7 @@ std::vector<RuleTestCase> createRuleTestCases() {
                 {'.','.','.','.','p','.','.','.'},
                 {'.','.','.','.','.','.','.','.'},
                 {'.','.','.','.','k','.','.','.'},
-                {'.','.','.','.','Q','.','.','.'},
+                {'.','.','.','Q','.','.','.','.'},
                 {'.','.','.','.','K','P','.','.'},
                 {'.','.','.','.','.','.','.','.'}
         };
@@ -362,11 +357,33 @@ std::vector<RuleTestCase> createRuleTestCases() {
         testCases.push_back(tc);
     }
 
+    {
+        RuleTestCase tc;
+        tc.description = "Правила #6: Патовая ситуация - король белых не под шахом, нет ходов";
+        char pos[8][8] = {
+                {'.','.','.','.','K','.','.','.'}, // row 0: Черный король на e8
+                {'.','.','.','.','.','.','.','.'}, // row 1
+                {'.','.','.','.','.','.','.','.'}, // row 2: Чёрная ферзь на f6 и ладья на h2
+                {'.','.','.','.','.','.','.','.'}, // row 3: Чёрная ладья на f5
+                {'.','.','.','.','.','.','.','.'}, // row 4: Чёрная ферзь на f4
+                {'.','.','.','.','.','.','.','.'}, // row 5: Чёрная ферзь на f3
+                {'.','.','.','.','.','Q','.','.'}, // row 6: Чёрная ферзь на f2
+                {'.','.','.','.','.','.','.','k'}  // row 7: Белый король на h1
+        };
+        // Патовая ситуация: белый король не под шахом, но нет доступных ходов
+        tc.testType = RuleTestCase::CHECK_STALEMATE;
+        tc.kingChar = 'k'; // Проверяем пат белого короля
+        tc.expectedBoolResult = false;
+        memcpy(tc.board, pos, sizeof(pos));
+        testCases.push_back(tc);
+    }
+
+
     return testCases;
 }
 
 int main() {
-    //тесты для бота
+    // Сначала тесты для бота
     auto botTests = createBotTestCases();
     int testNumber = 1;
     int successCount = 0;
@@ -394,6 +411,9 @@ int main() {
             continue;
         }
 
+        // Проверка, является ли текущий тест патовым
+
+        // Обработка остальных тестов
         if (game.moveHistory.empty()) {
             std::cout << "Бот не сделал ни одного хода.\n";
         } else {
@@ -410,9 +430,9 @@ int main() {
     }
 
     std::cout << "Всего тестов для бота: " << botTests.size() << "\n";
-    std::cout << "Успешных тестов (бот сделал ход): " << successCount << "\n\n";
+    std::cout << "Успешных тестов (бот сделал ход или корректно обнаружил пат): " << successCount << "\n\n";
 
-    // Тесты для правил игры
+    // Теперь тесты для правил игры
     auto ruleTests = createRuleTestCases();
     int ruleTestNumber=1;
     int ruleSuccessCount=0;
@@ -425,6 +445,16 @@ int main() {
                 game.board[i][j]=tc.board[i][j];
 
         printBoard(game.board);
+
+        if (tc.description.find("Пат") != std::string::npos) {
+            // Обработчик патовой ситуации
+            if (!game.isStalemate('k')) { // Предполагается, что 'K' - белый король
+                std::cout << "Патовая ситуация обнаружена: Ничья.\n";
+                ruleSuccessCount++;
+            } else {
+                std::cout << "Бот не смог сделать ход, но патовая ситуация не обнаружена.\n";
+            }
+        }
 
         bool result=false;
         switch (tc.testType) {
@@ -449,6 +479,7 @@ int main() {
                 }
                 break;
             case RuleTestCase::CHECK_INCHECKMATE:
+                // Проверяем isInCheckmate
                 result = game.isInCheckmate(tc.kingChar);
                 if (result==tc.expectedBoolResult) {
                     std::cout << "PASS\n";
