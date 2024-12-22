@@ -1,6 +1,9 @@
 # Универсальные шахматы 
 Это шахматное приложение, которое позволяет играть в партии с другим человеком или против бота. Оно работает через библиотеку FLTK (Fast, Light Toolkit), что позволяет пользователям легко взаимодействовать с программным обеспечением через удобный графический интерфейс.
 
+![strategy-competition-pieces-chessboard-checkmate](https://github.com/user-attachments/assets/e9e43acd-4e3e-43ad-95e3-b4a9122f0bca)
+
+
 ## Authors
 
 - [@huz, Репкина Д. А.](https://github.com/Huzmzmzm4444)
